@@ -1,0 +1,134 @@
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "-03:00";
+
+
+CREATE TABLE IF NOT EXISTS `Badge` (
+  `id` int(3) AUTO_INCREMENT,
+  `nome` varchar(30) NOT NULL,
+  `explicacao` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Cervejaria` (
+  `id` int(3) AUTO_INCREMENT,
+  `nome` varchar(50) NOT NULL,
+  `tipo` varchar(20) NOT NULL,
+  `local` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `Cerveja` (
+  `id` int(3) AUTO_INCREMENT,
+  `nome` varchar(50) NOT NULL,
+  `tipo` varchar(30) NOT NULL,
+  `teorAlcoolico` double NOT NULL,
+  `cervejaria` int(3) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Checkin` (
+  `id` int(3) AUTO_INCREMENT,
+  `data` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `estrelas` int(1) NOT NULL,
+  `consumidor` int(3) NOT NULL,
+  `cerveja` int(3) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `Usuario` (
+  `id` int(3) AUTO_INCREMENT,
+  `nome` varchar(80) NOT NULL,
+  `login` varchar(50) NOT NULL,
+  `senha` varchar(30) NOT NULL,
+  `dataNascimento` date NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Premiacao` (
+  `id` int(3) AUTO_INCREMENT,
+  `checkin` int(3) NOT NULL,
+  `badge` int(3) NOT NULL,
+  `dataPremiacao` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Amizade` (
+  `id` int(3) AUTO_INCREMENT,
+  `usuario1` int(3) NOT NULL,
+  `usuario2` int(3) NOT NULL,
+  `aceita` boolean NOT NULL DEFAULT 0,
+  `dataInicio` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `Comentario` (
+  `id` int(3) AUTO_INCREMENT,
+  `usuario` int(3) NOT NULL,
+  `checkin` int(3) NOT NULL,
+  `data` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `texto` varchar(300) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `Cerveja` ADD CONSTRAINT `cervejaFkCervejaria` FOREIGN KEY (`cervejaria`) REFERENCES `Cervejaria` (`id`);
+ALTER TABLE `Checkin` ADD CONSTRAINT `checkinFkConsumidor` FOREIGN KEY (`consumidor`) REFERENCES `Usuario` (`id`);
+ALTER TABLE `Checkin` ADD CONSTRAINT `checkinFkCerveja` FOREIGN KEY (`cerveja`) REFERENCES `Cerveja` (`id`);
+ALTER TABLE `Premiacao` ADD CONSTRAINT `premiacaoFkCheckin` FOREIGN KEY (`checkin`) REFERENCES `Checkin` (`id`);
+ALTER TABLE `Premiacao` ADD CONSTRAINT `premiacaoFkBadge` FOREIGN KEY (`badge`) REFERENCES `Badge` (`id`);
+ALTER TABLE `Amizade` ADD CONSTRAINT `amizadeFkUsuario1` FOREIGN KEY (`usuario1`) REFERENCES `Usuario` (`id`);
+ALTER TABLE `Amizade` ADD CONSTRAINT `amizadeFkUsuario2` FOREIGN KEY (`usuario2`) REFERENCES `Usuario` (`id`);
+ALTER TABLE `Comentario` ADD CONSTRAINT `comentarioFkUsuario` FOREIGN KEY (`usuario`) REFERENCES `Usuario` (`id`);
+ALTER TABLE `Comentario` ADD CONSTRAINT `comentarioFkCheckin` FOREIGN KEY (`checkin`) REFERENCES `Checkin` (`id`);
+
+INSERT INTO `Cervejaria` (`id`, `nome`, `tipo`, `local`) VALUES
+(1, 'Ambev', 'macro', 'global'),
+(2, 'Baden Banden', 'micro', 'Campos de Jordão');
+
+INSERT INTO `Cerveja` (`id`, `nome`, `tipo`, `teorAlcoolico`, `cervejaria`) VALUES
+(1, 'Brahma', 'Pilsen', 5.0, 1),
+(2, 'Brahma Extra Weiss', 'Weiss', 4.9, 1),
+(3, 'American IPA', 'American India Pale Ale', 6.4, 2),
+(4, 'Bock', 'Bock', 6.5, 2);
+
+INSERT INTO `Usuario` (`id`, `nome`, `dataNascimento`, `login`, `senha`) VALUES
+(1, 'Anderson Pereira', '1994-11-28', 'anderson', 'and123'),
+(2, 'Carolina Vasques', '1994-11-29', 'carolina', 'car123'),
+(3, 'Gabriel Félix Ramos', '1994-11-30', 'gabriel', 'gab123'),
+(4, 'João', '500-11-29', 'joao', 'joa123'),
+(5, 'Maria', '498-11-29', 'maria', 'mar123');
+
+INSERT INTO `Amizade` (`id`, `usuario1`, `usuario2`, `aceita`, `dataInicio`) VALUES
+(1, 1, 2, true, '2018-01-01 00:00:01'),
+(2, 1, 3, true, '2018-01-01 00:00:02'),
+(3, 2, 3, true, '2018-01-01 00:00:03'),
+(4, 4, 5, true, '1980-11-29 00:00:02');
+
+INSERT INTO `Checkin` (`id`, `data`, `estrelas`, `consumidor`, `cerveja`) VALUES
+(1, '2018-01-01 00:00:01', 3, 1, 1),
+(2, '2018-01-01 00:00:01', 5, 4, 3),
+(3, '2018-01-02 00:00:01', 3, 1, 1),
+(4, '2018-01-03 00:00:01', 3, 1, 1);
+
+INSERT INTO `Badge` (`id`, `nome`, `explicacao`) VALUES
+(1, 'Bem vindo', 'Realizou o primeiro check in'),
+(2, 'Bebendo no happy hour', 'Realizou um check in entre 18 e 21 horas'),
+(3, 'Ufa, hoje e sexta-feira', 'Realizou um check in na sexta-feira'),
+(4, '25 cervejas', 'Realizou 25 checks in'),
+(5, '50 cervejas', 'Realizou 50 checks in'),
+(6, '100 cervejas', 'Realizou 100 checks in'),
+(7, 'Expandindo horizonte', 'Realizou um check in de um novo tipo de cerveja'),
+(8, 'Bom de copo', 'Realizou tres checks in em menos de uma hora'),
+(9, 'Cliente fiel', 'Realizou tres checks in de uma mesma cerveja'),
+(10, 'Tem amigo', 'Recebeu um comentário em seu check in');
+
+INSERT INTO `Premiacao` (`id`, `checkin`, `badge`, `dataPremiacao`) VALUES
+(1, 1, 1, '2018-01-01  00:00:01'),
+(2, 2, 1, '2018-01-01  00:00:01'),
+(3, 4, 9, '2018-01-03  00:00:01'),
+(4, 4, 10, '2018-01-04  00:00:03');
+
+INSERT INTO `Comentario` (`id`, `usuario`, `checkin`, `data`, `texto`) VALUES
+(1, 2, 4, '2018-01-04 00:00:03', 'Seu bêbado!!!'),
+(2, 3, 4, '2018-01-04 00:00:04', 'Concordo com ela!');
